@@ -24,8 +24,8 @@ namespace NewtonPolynomial
             {
                 for (int j = 0; j < nodesCount - 1 - i; j++)	                                //na kazdym poziomie bedzie n-i wynikow
                 {
-                    if (j + i + 1 > nodesCount - 1 || i + j + index1 > resultList.Count - 1)	//blokada dla ostatniego poziomu (wykona sie tylko jedna operacja)
-                        return resultList;
+                    //if (j + i + 1 > nodesCount - 1 || i + j + index1 > resultList.Count - 1)	//blokada dla ostatniego poziomu (wykona sie tylko jedna operacja)
+                        //return resultList;
 
                     double denominator1 = nodesList[j + i + 1].X;
                     double denominator2 = nodesList[j].X;
@@ -42,7 +42,7 @@ namespace NewtonPolynomial
                 index2 += increaseIndex;
             }
 
-            return null;
+            return resultList;
 
         }
     }

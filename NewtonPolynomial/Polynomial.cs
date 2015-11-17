@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Windows.Forms.DataVisualization.Charting;
+using System.IO;
 
 namespace NewtonPolynomial
 {
@@ -27,13 +28,18 @@ namespace NewtonPolynomial
             Newton newton = new Newton();
             resultList = newton.count(this.nodesList, nodesCount);
 
-            Series series = new Series("function");
+            string python = PolyCount();
+            
+
+
+            Series series = new Series(ExecutePython(python));
             Series nodesSeries = new Series("Nodes");
 
             series.ChartType = SeriesChartType.Spline;
             series.Color = Color.Blue;
             series.BorderWidth = 5;
-      
+
+            
 
             nodesSeries.ChartType = SeriesChartType.FastPoint;
             nodesSeries.Color = Color.OrangeRed;
@@ -55,6 +61,70 @@ namespace NewtonPolynomial
             this.polynomialChart.Series.Add(series);
             
             this.polynomialChart.Series.Add(nodesSeries);
+        }
+
+        private string ExecutePython(string python)
+        {
+            string script = "from sympy import *\nx, y, z = symbols('x y z')\ninit_printing(use_unicode=True)\nwynik = expand(" + python + ")\nf = open( 'wynik.txt', 'w' )\nf.write( str(wynik) )\nf.close()";
+
+            using (StreamWriter sw = new StreamWriter("skrypt.py"))
+            {
+                sw.Write(script);
+            }
+
+            string strCmdText = "/C python " + AppDomain.CurrentDomain.BaseDirectory + "skrypt.py";
+            System.Diagnostics.Process.Start("CMD.exe", strCmdText);
+
+            using (StreamReader sr = new StreamReader("wynik.txt"))
+            {
+                string line = string.Empty;
+
+                line = sr.ReadLine();
+
+                line = line.Replace("**", "^");
+
+                return line;
+            }
+        }
+
+        private string PolyCount()
+        {
+            List<double> listEnding = new List<double>();
+
+            int n = 0;
+
+
+            for (int i = 0; i < nodesList.Count; i++)
+            {
+              
+
+                listEnding.Add(resultList[n]);
+                n += nodesList.Count - i;
+            }
+
+            string python = String.Empty;
+
+            for (int i = 0; i < listEnding.Count; i++)
+            {
+                if (listEnding[i] >= 0 && i != 0)
+                    python += "+";
+                python += listEnding[i];
+
+                for (int j = 0; j < i; j++)
+                {
+                    if (nodesList[j].X < 0)
+                        python += "*(x +";
+                    else
+                        python += "*(x -";
+                    python += nodesList[j].X + ")";
+
+                }
+
+            }
+
+            python = python.Replace(",", ".");
+
+            return python;
         }
 
         private void Polynomial_Resize(object sender, EventArgs e)
