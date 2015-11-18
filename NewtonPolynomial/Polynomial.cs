@@ -29,7 +29,7 @@ namespace NewtonPolynomial
             resultList = newton.count(this.nodesList, nodesCount);
 
             string python = PolyCount();
-            
+
 
 
             Series series = new Series(ExecutePython(python));
@@ -39,7 +39,7 @@ namespace NewtonPolynomial
             series.Color = Color.Blue;
             series.BorderWidth = 5;
 
-            
+
 
             nodesSeries.ChartType = SeriesChartType.FastPoint;
             nodesSeries.Color = Color.OrangeRed;
@@ -51,15 +51,15 @@ namespace NewtonPolynomial
                 nodesSeries.Points.AddXY(this.nodesList[i].X, this.nodesList[i].Y);
             }
 
-            this.polynomialChart.ChartAreas[0].AxisY.Minimum = nodesList.Min(node => node.Y) -5;
-            this.polynomialChart.ChartAreas[0].AxisY.Maximum = nodesList.Max(node => node.Y) +5;
+            this.polynomialChart.ChartAreas[0].AxisY.Minimum = nodesList.Min(node => node.Y) - 5;
+            this.polynomialChart.ChartAreas[0].AxisY.Maximum = nodesList.Max(node => node.Y) + 5;
             this.polynomialChart.ChartAreas[0].AxisX.Minimum = nodesList.Min(node => node.X);
             this.polynomialChart.ChartAreas[0].AxisX.Maximum = nodesList.Max(node => node.X);
 
             this.polynomialChart.Legends.Add(new Legend());
 
             this.polynomialChart.Series.Add(series);
-            
+
             this.polynomialChart.Series.Add(nodesSeries);
         }
 
@@ -73,7 +73,8 @@ namespace NewtonPolynomial
             }
 
             string strCmdText = "/C python " + AppDomain.CurrentDomain.BaseDirectory + "skrypt.py";
-            System.Diagnostics.Process.Start("CMD.exe", strCmdText);
+            System.Diagnostics.Process cmd = System.Diagnostics.Process.Start("CMD.exe", strCmdText);
+            cmd.WaitForExit();
 
             using (StreamReader sr = new StreamReader("wynik.txt"))
             {
@@ -96,27 +97,29 @@ namespace NewtonPolynomial
 
             for (int i = 0; i < nodesList.Count; i++)
             {
-              
+
 
                 listEnding.Add(resultList[n]);
                 n += nodesList.Count - i;
             }
 
             string python = String.Empty;
+            python += listEnding[0];
 
-            for (int i = 0; i < listEnding.Count; i++)
+            for (int i = 1; i < listEnding.Count; i++)
             {
-                if (listEnding[i] >= 0 && i != 0)
-                    python += "+";
-                python += listEnding[i];
+
+                if (listEnding[i] < 0)
+                    python += listEnding[i];
+                else
+                    python += "+" + listEnding[i];
 
                 for (int j = 0; j < i; j++)
                 {
                     if (nodesList[j].X < 0)
-                        python += "*(x +";
+                        python += "*(x +" + (-1 * nodesList[j].X) + ")";
                     else
-                        python += "*(x -";
-                    python += nodesList[j].X + ")";
+                        python += "*(x -" + nodesList[j].X + ")";
 
                 }
 
